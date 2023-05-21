@@ -1,6 +1,6 @@
 # TriPlaneNet
 
-https://github.com/seva100/triplanenet/assets/5861398/69066d11-d38e-4a36-8c41-8aeaddf73ae3
+https://github.com/seva100/triplanenet/assets/5861398/1f1a3f4e-586b-4a1f-a610-691683968e7b
 
 TriPlaneNet inverts an input image into the latent space of 3D GAN for novel view rendering.
 
