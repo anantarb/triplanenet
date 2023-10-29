@@ -4,7 +4,7 @@ https://github.com/seva100/triplanenet/assets/5861398/1f1a3f4e-586b-4a1f-a610-69
 
 TriPlaneNet inverts an input image into the latent space of 3D GAN for novel view rendering.
 
-This is the official repository that contains source code for the arXiv paper v1 [TriPlaneNet](https://anantarb.github.io/triplanenet).
+This is the official repository that contains source code for the arXiv paper [TriPlaneNet v1](https://anantarb.github.io/triplanenet).
 
 [[Paper v2](https://arxiv.org/abs/2303.13497)] [[Paper v1](https://arxiv.org/abs/2303.13497v1)] [[Project Page](https://anantarb.github.io/triplanenet)] [[Video](https://youtu.be/GpmSswHMeWU)]
 
