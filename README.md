@@ -6,7 +6,7 @@ TriPlaneNet inverts an input image into the latent space of 3D GAN for novel vie
 
 This is the official repository that contains source code for the arXiv paper [TriPlaneNet v1](https://anantarb.github.io/triplanenet).
 
-[[Paper v2](https://arxiv.org/abs/2303.13497)] [[Paper v1](https://arxiv.org/abs/2303.13497v1)] [[Project Page](https://anantarb.github.io/triplanenet)] [[Video](https://youtu.be/GpmSswHMeWU)]
+[[Paper v2](https://arxiv.org/abs/2303.13497)] [[Paper v1](https://arxiv.org/abs/2303.13497v1)] [[Project Page](https://anantarb.github.io/triplanenet)] [[Video](https://www.youtube.com/watch?v=NttXgBE12ec)]
 
 If you find TriPlaneNet useful for your work please cite:
 ```
