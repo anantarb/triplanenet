@@ -13,7 +13,6 @@ class TestOptions:
 		self.parser.add_argument('--checkpoint_path', default=None, type=str, help='Path to TriPlaneNet model checkpoint')
 		self.parser.add_argument('--data_path', type=str, default='gt_images', help='Path to directory of images to evaluate')
 		self.parser.add_argument('--couple_outputs', action='store_true', help='Whether to also save inputs + outputs side-by-side')
-		self.parser.add_argument('--resize_outputs', action='store_true', help='Whether to resize outputs to 256x256 or keep at 512x512')
 		self.parser.add_argument('--novel_view_angles', nargs="*", type=float, default=[], help='Novel view angles from the frontal for novel view rendering')
 		self.parser.add_argument('--shapes', action='store_true', help='Whether to export shapes as .ply files')
 		self.parser.add_argument('--calculate_metrics', action='store_true', help='Whether to calculate metrics on the given images and save it')

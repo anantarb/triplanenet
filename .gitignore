@@ -130,5 +130,6 @@ dmypy.json
 
 pretrained_models/
 wandb/
+exps/
 
 

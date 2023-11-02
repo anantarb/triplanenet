@@ -1,24 +1,26 @@
-# TriPlaneNet
+# TriPlaneNet: An Encoder for EG3D Inversion (WACV'24)
 
-https://github.com/seva100/triplanenet/assets/5861398/1f1a3f4e-586b-4a1f-a610-691683968e7b
+<p align="center"><img src="./docs/teaser.gif" alt="animated"/></p>
 
 TriPlaneNet inverts an input image into the latent space of 3D GAN for novel view rendering.
 
-This is the official repository that contains source code for the arXiv paper [TriPlaneNet v1](https://anantarb.github.io/triplanenet).
+This is the official repository that contains source code for the arXiv paper [TriPlaneNet v1 & TriPlaneNet v2](https://anantarb.github.io/triplanenet).
 
 [[Paper v2](https://arxiv.org/abs/2303.13497)] [[Paper v1](https://arxiv.org/abs/2303.13497v1)] [[Project Page](https://anantarb.github.io/triplanenet)] [[Video](https://www.youtube.com/watch?v=NttXgBE12ec)]
 
 If you find TriPlaneNet useful for your work please cite:
 ```
-@preprint{bhattarai2023triplanenet,
-    title={TriPlaneNet: An Encoder for EG3D Inversion},
-    author={Bhattarai, Ananta R. and Nie{\ss}ner, Matthias and Sevastopolsky, Artem},
-    journal={arXiv preprint arXiv:2303.13497},
-    year={2023}
+@article{bhattarai2024triplanenet,
+      title={TriPlaneNet: An Encoder for EG3D Inversion},
+      author={Bhattarai, Ananta R. and Nie{\ss}ner, Matthias and Sevastopolsky, Artem},
+      booktitle={IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)},
+      year={2024}
 }
 ```
 
 ## News
+
+* **02.11.2023**: Code for TriPlaneNet v2 is released. :fire:
 
 * **29.10.2023**: The second version of the article has been accepted to WACV 2024 and features additional contributions and better results. :fire: Code for TriPlaneNet v2 is coming soon.
 
@@ -35,13 +37,14 @@ This will set up a conda environment `triplanenet` with all dependencies. The sc
 2. (Optional) Install `ffmpeg` on the system if you want to run the model on videos.
 
 ## Prepare datasets
-Datasets are stored in a directory containing PNG/JPG files and a metadata file `dataset.json` for labels. Each label is a 25-length list of floating point numbers, which is the concatenation of the flattened 4x4 camera extrinsic matrix and flattened 3x3 camera intrinsic matrix. We provide an example of the dataset structure in `dataset_preprocessing/ffhq/example_dataset/`. Training Dataset is pre-processed using the procedure as described in [here](./dataset_preprocessing/ffhq/README.md). For inference, images should be pre-processed in a way that align with the training data following [dataset preprocessing](./dataset_preprocessing/ffhq/README.md). 
+Datasets are stored in a directory containing PNG/JPG files, a metadata file `dataset.json` for labels, and the confidence maps given by a pre-trained network from [unsup3d](https://elliottwu.com/projects/20_unsup3d/). Each label is a 25-length list of floating point numbers, which is the concatenation of the flattened 4x4 camera extrinsic matrix and flattened 3x3 camera intrinsic matrix. We provide an example of the dataset structure in `dataset_preprocessing/ffhq/example_dataset/`. Training Dataset is pre-processed using the procedure as described in [here](./dataset_preprocessing/ffhq/README.md). For inference, images should be pre-processed in a way that align with the training data following [dataset preprocessing](./dataset_preprocessing/ffhq/README.md). 
 
 ## Pretrained Models
-Please download the pre-trained model from the following link. TriPlaneNet model contains the entire TriPlaneNet architecture, including the encoder and decoder weights.
+We release the following pre-trained models. TriPlaneNet model contains the entire TriPlaneNet architecture, including the encoder and decoder weights.
 | Path | Description
 | :--- | :----------
 |[EG3D Inversion](https://drive.google.com/file/d/17pzNC00BOFCu0oCqbCybfAiaZF7iwNUU/view?usp=share_link)  | TriPlaneNet trained with the (FFHQ dataset + synthesized EG3D samples) for EG3D inversion.
+|[EG3D Inversion](https://drive.google.com/file/d/1Q7hGZw97nTmRyJ-itVGRaFJn9KyjAuhn/view?usp=sharing)  | TriPlaneNet v2 trained with the (FFHQ dataset + synthesized EG3D samples) for EG3D inversion.
 
 If you wish to use the pretrained model for training or inference, you may do so using the flag `--checkpoint_path`.
 
@@ -69,7 +72,20 @@ We provide an example how the dataset directory should be structured [here](./da
 
 - Don't forget to pre-process the data as described in [here](./dataset_preprocessing/ffhq/README.md).
 
-### Training TriPlaneNet
+### Training TriPlaneNet v2
+The main training script can be found in `scripts/train_v2.py`.
+Intermediate training results are saved to `opts.exp_dir`. This includes checkpoints, train outputs, and test outputs.
+Additionally, if you have tensorboard installed, you can visualize tensorboard logs in `opts.exp_dir/logs`.
+Experiments can also be tracked with [Weights & Biases](https://wandb.ai/home). To enable Weights & Biases (`wandb`), first make an account on the platform's webpage and install `wandb` using `pip install wandb`. Then, to train TriPlaneNet v2 using `wandb`, simply add the flag `--use_wandb`.
+Training, for example, can be launched with the following command
+```
+python scripts/train_v2.py \
+--exp_dir=/path/to/experiment \
+--use_wandb
+```
+We provide a highly configurable implementation. See `options/train_options_v2.py` for a complete list of the configuration options.
+
+### Training TriPlaneNet v1
 The main training script can be found in `scripts/train.py`.
 Intermediate training results are saved to `opts.exp_dir`. This includes checkpoints, train outputs, and test outputs.
 Additionally, if you have tensorboard installed, you can visualize tensorboard logs in `opts.exp_dir/logs`.
@@ -90,7 +106,37 @@ python scripts/train.py \
 ```
 We provide a highly configurable implementation. See `options/train_options.py` for a complete list of the configuration options.
 
-## Testing
+## Testing v2
+
+### Inference on images
+Having trained your model, you can use `scripts/inference_v2.py` to apply the model on a set of images.
+```
+python scripts/inference_v2.py \
+--exp_dir=/path/to/experiment \
+--checkpoint_path=experiment/checkpoints/best_model.pt \
+--data_path=/path/to/test_data \
+--test_batch_size=4 \
+--test_workers=4 \
+--shapes \
+--novel_view_angles -0.3 0.3
+```
+
+### Inference on videos
+You can use `scripts/inference_video_v2.py` to apply the model on a video.
+```
+python scripts/inference_video_v2.py \
+--exp_dir=/path/to/experiment \
+--checkpoint_path=experiment/checkpoints/best_model.pt \
+--data_path=/path/to/extracted_frames \
+--test_batch_size=4 \
+--test_workers=4 \
+--frame_rate=30 \
+--novel_view_angles -0.3 0.3 
+```
+To extract frames from a video, refer to [dataset preprocessing](./dataset_preprocessing/ffhq/README.md).
+For more video inference options, see `options/test_options_videos_v2.py`.
+
+## Testing v1
 
 ### Inference on images
 Having trained your model, you can use `scripts/inference.py` to apply the model on a set of images.
@@ -107,26 +153,9 @@ python scripts/inference.py \
 ```
 For challenging cases, you can also apply cascaded test-time refinement (CTTR) by simply adding the flag `--CTTR`. For more inference options, see `options/test_options.py`.
 
-### Inference on videos
-You can use `scripts/inference_video.py` to apply the model on a video.
-```
-python scripts/inference_video.py \
---exp_dir=/path/to/experiment \
---checkpoint_path=experiment/checkpoints/best_model.pt \
---data_path=/path/to/extracted_frames \
---test_batch_size=4 \
---test_workers=4 \
---frame_rate=30 \
---novel_view_angles -0.3 0.3 
-```
-To extract frames from a video, refer to [dataset preprocessing](./dataset_preprocessing/ffhq/README.md).
-For more video inference options, see `options/test_options_videos.py`.
-
-## Limitations
-- Our method works best on the frontal images due to frontal bias in the training dataset.
-
-## Major changes
-- In the paper, we report final ID similarity metric for all methods by performing the normalization `(ID_SIM) * 0.5 + 0.5`. However, we drop the normalization in this code.   
+## Major updates
+- We have merged the code of TriPlaneNet v2 and recommend running inference with TriPlaneNet v2 since it leads to better results.
+- In the v1 paper, we report the final ID similarity metric for all methods by performing the normalization `(ID_SIM) * 0.5 + 0.5`. However, we drop the normalization in this code.   
 
 ## Acknowledgements
 

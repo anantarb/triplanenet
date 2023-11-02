@@ -91,7 +91,7 @@ class Coach:
 			for batch_idx, batch in enumerate(self.train_dataloader):
 				self.optimizer_triplane.zero_grad()
 				self.optimizer_psp.zero_grad()
-				x, camera_param = batch
+				x, camera_param, _ = batch
 				x, camera_param = x.to(self.device).float(), camera_param.to(self.device).float()
 				x_clone = x.clone()
 				if self.global_step >= self.opts.add_triplanenet:
@@ -158,7 +158,7 @@ class Coach:
 		self.net.eval()
 		agg_loss_dict = []
 		for batch_idx, batch in enumerate(self.test_dataloader):
-			x, camera_param = batch
+			x, camera_param, _ = batch
 			with torch.no_grad():
 				x, camera_param = x.to(self.device).float(), camera_param.to(self.device).float()
 				outputs = self.net.forward(x, camera_params=camera_param, resize=True, return_yhat_psp=True)

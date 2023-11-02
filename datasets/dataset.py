@@ -89,7 +89,8 @@ class Dataset(torch.utils.data.Dataset):
         return self._raw_idx.size
 
     def __getitem__(self, idx):
-        image = self._load_raw_image(self._raw_idx[idx])
+        image, fname = self._load_raw_image(self._raw_idx[idx])
+        fname = fname[:-4]
         assert isinstance(image, np.ndarray)
         assert list(image.shape) == self.image_shape
         assert image.dtype == np.uint8
@@ -103,7 +104,7 @@ class Dataset(torch.utils.data.Dataset):
 				transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
         image = trans(image)
 
-        return image, torch.from_numpy(self.get_label(idx))
+        return image, torch.from_numpy(self.get_label(idx)), fname
 
     def get_label(self, idx):
         label = self._get_raw_labels()[self._raw_idx[idx]]
@@ -191,7 +192,7 @@ class ImageFolderDataset(Dataset):
             raise IOError('No image files found in the specified path')
 
         name = os.path.splitext(os.path.basename(self._path))[0]
-        raw_shape = [len(self._image_fnames)] + list(self._load_raw_image(0).shape)
+        raw_shape = [len(self._image_fnames)] + list(self._load_raw_image(0)[0].shape)
         if resolution is not None and (raw_shape[2] != resolution or raw_shape[3] != resolution):
             raise IOError('Image files do not match the specified resolution')
         super().__init__(name=name, raw_shape=raw_shape, **super_kwargs)
@@ -233,7 +234,7 @@ class ImageFolderDataset(Dataset):
         if image.ndim == 2:
             image = image[:, :, np.newaxis] # HW => HWC
         image = image.transpose(2, 0, 1) # HWC => CHW
-        return image
+        return image, fname
 
     def _load_raw_labels(self):
         fname = 'dataset.json'

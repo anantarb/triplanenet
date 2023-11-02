@@ -96,7 +96,7 @@ def convert_sdf_samples_to_ply(
     ply_data.write(ply_filename_out)
 
 
-def extract_shape(G, ws, triplaneoffsets=None, device="cuda"):
+def extract_shape(G, ws, triplaneoffsets=None, triplanes=None, device="cuda"):
     max_batch=1000000
     shape_res = 256
     samples, voxel_origin, voxel_size = create_samples(N=shape_res, voxel_origin=[0, 0, 0], cube_length=G.rendering_kwargs['box_warp'] * 1)
@@ -112,6 +112,8 @@ def extract_shape(G, ws, triplaneoffsets=None, device="cuda"):
             planes = G.backbone.synthesis(ws, update_emas=False)
             if triplaneoffsets is not None:
                 planes = planes + triplaneoffsets
+            elif triplanes is not None:
+                planes = triplanes
             planes = planes.view(len(planes), 3, 32, planes.shape[-2], planes.shape[-1])
             sigma = G.renderer.run_model(planes, G.decoder, samples[:, head:head+max_batch], transformed_ray_directions_expanded[:, :samples.shape[1]-head], G.rendering_kwargs)['sigma']
 

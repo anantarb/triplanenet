@@ -41,11 +41,21 @@ python -c "import gdown; gdown.download('https://drive.google.com/uc?id=1KW7bjnd
 python -c "import gdown; gdown.download('https://drive.google.com/uc?id=1f4IwVa2-Bn9vWLwB-bUwm53U_MlvinAj', 'pretrained_models/CurricularFace_Backbone.pth', quiet=False)"
 python -c "import gdown; gdown.download('https://drive.google.com/uc?id=1tJ7ih-wbCO6zc3JhI_1ZGjmwXKKaPlja', 'pretrained_models/mtcnn.tar.gz', quiet=False)"
 python -c "import gdown; gdown.download('https://drive.google.com/uc?id=17pzNC00BOFCu0oCqbCybfAiaZF7iwNUU', 'pretrained_models/triplanenet_final.pth', quiet=False)"
+python -c "import gdown; gdown.download('https://drive.google.com/uc?id=1KET4pHodyTeYsMtJTTKMh0YJ2a-LhgLl', 'pretrained_models/discriminator.pth', quiet=False)"
+python -c "import gdown; gdown.download('https://drive.google.com/uc?id=1Q7hGZw97nTmRyJ-itVGRaFJn9KyjAuhn', 'pretrained_models/triplanenet_v2_final.pth', quiet=False)"
 cd pretrained_models/
 tar -xvzf mtcnn.tar.gz
 
+cd ../
+
 git submodule update --init --recursive
-cd ../dataset_preprocessing/ffhq/Deep3DFaceRecon_pytorch/
+
+rm -rf ./dataset_preprocessing/ffhq/unsup3d/unsup3d/__init__.py
+cd ./dataset_preprocessing/ffhq/unsup3d/pretrained/
+sh download_pretrained_celeba.sh
+cd ../../../../
+
+cd ./dataset_preprocessing/ffhq/Deep3DFaceRecon_pytorch/
 git clone https://github.com/NVlabs/nvdiffrast
 cd nvdiffrast
 pip install .

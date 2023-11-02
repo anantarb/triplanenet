@@ -72,7 +72,7 @@ def run():
 
     global_time = []
     global_i = 0
-    for x, camera_param  in tqdm(dataloader):
+    for x, camera_param, fname in tqdm(dataloader):
 
         with torch.no_grad():
             x, camera_param = x.cuda().float(), camera_param.cuda().float()
@@ -88,14 +88,14 @@ def run():
 
                 if opts.couple_outputs:
                     input_im = log_input_image(x[i], opts)
-                    resize_amount = (256, 256) if opts.resize_outputs else (512, 512)
+                    resize_amount = (256, 256)
                     if res is None:
                         res = np.concatenate([np.array(input_im.resize(resize_amount)),
                                                 np.array(result.resize(resize_amount))], axis=1)
                     else:
                         res = np.concatenate([res, np.array(result.resize(resize_amount))], axis=1)
                 if j == 0:
-                    im_save_path = os.path.join(out_path_results, f'{global_i}_same-view.jpg')
+                    im_save_path = os.path.join(out_path_results, f'{fname[i]}_same-view.png')
                     if opts.calculate_metrics:
                         scores['mse'].append(metrics.mse(x[i], results_batch[j][i]))
                         scores['lpips'].append(metrics.lpips(x[i], results_batch[j][i]))
@@ -104,23 +104,24 @@ def run():
                         if id_sim is not None:
                             scores['id-sim_same-view'].append(id_sim)
                 else:
-                    im_save_path = os.path.join(out_path_results, f'{global_i}_{opts.novel_view_angles[j-1]}.jpg')
+                    im_save_path = os.path.join(out_path_results, f'{fname[i]}_{opts.novel_view_angles[j-1]}.png')
                     if opts.calculate_metrics:
                         id_sim = metrics.id_similarity(x[i], results_batch[j][i])
                         if id_sim is not None:
                             scores[f'id-sim_{opts.novel_view_angles[j-1]}'].append(id_sim)
                 Image.fromarray(np.array(result)).save(im_save_path)
+            input_im = (log_input_image(x[i], opts)).save(os.path.join(out_path_results, f'{fname[i]}_original.png'))
             if opts.couple_outputs:
-                Image.fromarray(res).save(os.path.join(out_path_coupled, f'{global_i}.jpg'))
+                Image.fromarray(res).save(os.path.join(out_path_coupled, f'{fname[i]}.png'))
 
             if opts.shapes:
-                convert_sdf_samples_to_ply(np.transpose(sigmas[i], (2, 1, 0)), [0, 0, 0], 1, os.path.join(out_path_shapes, f'{global_i}.ply'), level=10)
+                convert_sdf_samples_to_ply(np.transpose(sigmas[i], (2, 1, 0)), [0, 0, 0], 1, os.path.join(out_path_shapes, f'{fname[i]}.ply'), level=10)
             global_i += 1
 
     stats_path = os.path.join(opts.exp_dir, 'stats.txt')
     result_str = 'Runtime {:.4f}+-{:.4f}'.format(np.mean(global_time), np.std(global_time))
     if opts.calculate_metrics:
-        scores = {key: sum(value) / len(value) for key, value in scores.items()}
+        scores = {key: float(np.nanmean(np.array(value))) for key, value in scores.items()}
         result_str += '\n' + f'{str(scores)}'
     print(result_str)
 
@@ -129,7 +130,7 @@ def run():
 
 
 def run_on_batch(x, camera_param, net, opts):
-    outputs_batch = net(x, camera_param, resize=opts.resize_outputs, return_latents=True, return_triplaneoffsets=True, CTTR=opts.CTTR)
+    outputs_batch = net(x, camera_param, resize=True, return_latents=True, return_triplaneoffsets=True, CTTR=opts.CTTR)
     results_batch, latents_batch, triplaneoff_batch = [outputs_batch[0]], outputs_batch[1], outputs_batch[2]
     for angle_y in opts.novel_view_angles:
         angle_p = 0
@@ -143,7 +144,7 @@ def run_on_batch(x, camera_param, net, opts):
     sigmas = []
     if opts.shapes:
         for i in range(latents_batch.shape[0]):
-            sigmas += [extract_shape(net.decoder, latents_batch[i:i+1, :], triplaneoff_batch[i:i+1, :, :, :])]
+            sigmas += [extract_shape(net.decoder, latents_batch[i:i+1, :], triplaneoffsets=triplaneoff_batch[i:i+1, :, :, :])]
 
     return results_batch, sigmas
 

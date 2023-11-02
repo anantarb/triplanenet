@@ -33,13 +33,17 @@ if __name__ == '__main__':
     if not os.path.exists(out_dir):
         os.makedirs(out_dir, exist_ok=True)
         
-    for img_file, lm_file in zip(img_files, lm_files):
-
+    for img_file in img_files:
+        
+        img_name = img_file.split('/')[-1][:-4]
         img_path = os.path.join(args.indir, img_file)
-        lm_path = os.path.join(lm_dir, lm_file)
+        lm_path = os.path.join(lm_dir, f'{img_name}.txt')
         im = Image.open(img_path).convert('RGB')
         _,H = im.size
-        lm = np.loadtxt(lm_path).astype(np.float32)
+        try:
+            lm = np.loadtxt(lm_path).astype(np.float32)
+        except:
+            continue
         lm = lm.reshape([-1, 2])
         lm[:, -1] = H - 1 - lm[:, -1]
         

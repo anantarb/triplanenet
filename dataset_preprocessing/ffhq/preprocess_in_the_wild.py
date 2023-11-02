@@ -10,9 +10,12 @@
 
 import os
 import argparse
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--indir', type=str, required=True)
 parser.add_argument('--mirror', action='store_true')
+parser.add_argument('--conf_map', action='store_true')
+
 args = parser.parse_args()
 args.indir = os.path.join(args.indir, "")[:-1]
 args.indir = os.path.abspath(args.indir)
@@ -50,3 +53,10 @@ else:
 print(command)
 os.system(command)
 print(f"Pre-processed images with camera labels have been saved to {out_folder}")
+
+if args.conf_map:
+    out_folder = os.path.join(args.indir, "preprocessed", "conf_map")
+    command = f"python conf_map.py --source {os.path.join(args.indir, 'preprocessed')} --dest {out_folder}"
+    print(command)
+    os.system(command)
+    print(f"Confidence maps have been saved to {out_folder}")
