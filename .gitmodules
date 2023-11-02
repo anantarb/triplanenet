@@ -1,1 +1,7 @@
 
+[submodule "dataset_preprocessing/ffhq/Deep3DFaceRecon_pytorch"]
+	path = dataset_preprocessing/ffhq/Deep3DFaceRecon_pytorch
+	url = https://github.com/sicxu/Deep3DFaceRecon_pytorch.git
+[submodule "dataset_preprocessing/ffhq/unsup3d"]
+	path = dataset_preprocessing/ffhq/unsup3d
+	url = https://github.com/elliottwu/unsup3d.git
